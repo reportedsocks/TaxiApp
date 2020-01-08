@@ -17,10 +17,14 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.reportedsocks.taxiapp.R;
 import com.reportedsocks.taxiapp.model.User;
+import com.reportedsocks.taxiapp.utils.Utils;
 
 public class DriverSignInActivity extends AppCompatActivity {
 
@@ -40,6 +44,7 @@ public class DriverSignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_sign_in);
+        Utils.setupUI(findViewById(R.id.driverSignInParentView), DriverSignInActivity.this);
 
         textInputEmail = findViewById(R.id.textInputEmail);
         textInputName = findViewById(R.id.textInputName);
@@ -113,7 +118,7 @@ public class DriverSignInActivity extends AppCompatActivity {
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w("FirebaseAuth", "signInWithEmail:failure", task.getException());
-                                Toast.makeText(DriverSignInActivity.this, "Authentication failed.",
+                                Toast.makeText(DriverSignInActivity.this, "Sign in error",
                                         Toast.LENGTH_SHORT).show();
                                 updateUI(null);
                             }
@@ -137,7 +142,7 @@ public class DriverSignInActivity extends AppCompatActivity {
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w("FirebaseAuth", "createUserWithEmail:failure", task.getException());
-                                Toast.makeText(DriverSignInActivity.this, "Authentication failed.",
+                                Toast.makeText(DriverSignInActivity.this, "Registration error",
                                         Toast.LENGTH_SHORT).show();
                                 updateUI(null);
                             }
@@ -149,11 +154,8 @@ public class DriverSignInActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser firebaseUser) {
         if(isLoginModeActive){
-            if(firebaseUser != null){
-                startActivity(new Intent(DriverSignInActivity.this, DriverMapsActivity.class));
-            } else {
-                return;
-            }
+            checkIfDriverIsLoggedIn(firebaseUser);
+            return;
         } else {
             if(firebaseUser != null){
                 User user = new User();
@@ -166,6 +168,38 @@ public class DriverSignInActivity extends AppCompatActivity {
             } else {
                 return;
             }
+        }
+    }
+
+    private void checkIfDriverIsLoggedIn(final FirebaseUser firebaseUser) {
+        if(firebaseUser != null){
+            ValueEventListener userListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()) {
+                        User user = userSnapshot.getValue(User.class);
+
+                        if(user.getId().equals(firebaseUser.getUid())){
+                            if(user.isDriver()){
+                                startActivity(new Intent(DriverSignInActivity.this, DriverMapsActivity.class));
+                            } else {
+                                Toast.makeText(DriverSignInActivity.this, "Log in as a passenger", Toast.LENGTH_LONG).show();
+                                auth.signOut();
+                            }
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.w("DriverSignInActivity", "loadPost:onCancelled", databaseError.toException());
+                    // ...
+                }
+            };
+            usersDatabaseReference.addListenerForSingleValueEvent(userListener);
+
         }
     }
 
