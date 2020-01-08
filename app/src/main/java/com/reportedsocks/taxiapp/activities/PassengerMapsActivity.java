@@ -39,6 +39,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -83,6 +84,8 @@ public class PassengerMapsActivity extends FragmentActivity implements OnMapRead
     private boolean isDriverFound = false;
     private String nearestDriverId;
     private Marker driverMarker;
+
+    private int i = 0; // trigger camera zoom only once
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,7 +238,14 @@ public class PassengerMapsActivity extends FragmentActivity implements OnMapRead
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        UiSettings mapSettings = mMap.getUiSettings();
+        mapSettings.setZoomControlsEnabled(true);
+        mapSettings.setCompassEnabled(true);
+        mapSettings.setZoomGesturesEnabled(true);
+        mapSettings.setScrollGesturesEnabled(true);
+        mapSettings.setRotateGesturesEnabled(true);
 
+        mMap.setMyLocationEnabled(true);
         if(currentLocation != null){
             LatLng driverLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             mMap.addMarker(new MarkerOptions().position(driverLocation).title("Passenger Location"));
@@ -398,8 +408,11 @@ public class PassengerMapsActivity extends FragmentActivity implements OnMapRead
         if (currentLocation != null) {
             LatLng passengerLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(passengerLocation));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+            if(i == 0){
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(passengerLocation));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+                i++;
+            }
             mMap.addMarker(new MarkerOptions().position(passengerLocation).title("Passenger Location"));
             GeoFire geoFire = new GeoFire(usersDatabaseReference.child(currentUser.getUid()));
             geoFire.setLocation("location", new GeoLocation(currentLocation.getLatitude(), currentLocation.getLongitude()));

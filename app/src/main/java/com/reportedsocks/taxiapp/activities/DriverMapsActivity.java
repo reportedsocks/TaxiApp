@@ -38,6 +38,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -77,6 +78,8 @@ public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCa
 
     private Button settingsButton;
     private Button signOutButton;
+
+    private int i = 0; // trigger camera zoom only once
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +141,15 @@ public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        UiSettings mapSettings = mMap.getUiSettings();
+        mapSettings.setZoomControlsEnabled(true);
+        mapSettings.setCompassEnabled(true);
+        mapSettings.setZoomGesturesEnabled(true);
+        mapSettings.setScrollGesturesEnabled(true);
+        mapSettings.setRotateGesturesEnabled(true);
+
+        mMap.setMyLocationEnabled(true);
 
         if(currentLocation != null){
             LatLng driverLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -301,8 +313,12 @@ public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCa
         if (currentLocation != null) {
             LatLng driverLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(driverLocation));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+            // trigger camera zoom only once
+            if(i == 0){
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(driverLocation));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+                i++;
+            }
             mMap.addMarker(new MarkerOptions().position(driverLocation).title("Driver Location"));
             GeoFire geoFire = new GeoFire(locationDatabaseReference);
             geoFire.setLocation(currentUser.getUid(), new GeoLocation(currentLocation.getLatitude(), currentLocation.getLongitude()));
@@ -445,4 +461,6 @@ public class DriverMapsActivity extends FragmentActivity implements OnMapReadyCa
         return permissionState == PackageManager.PERMISSION_GRANTED;
 
     }
+
+
 }
