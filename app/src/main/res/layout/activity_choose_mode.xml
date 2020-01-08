@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.ChooseModeActivity">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="centerCrop"
+        android:scrollX="120dp"
+        android:src="@drawable/taxi_splash_screen" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Taxi App"
+            android:textSize="60sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="300dp"/>
+        <Button
+            android:id="@+id/passengerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@color/colorPrimary"
+            android:text="I'm a passenger"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:onClick="goToPassengerSignIn"/>
+        <Button
+            android:id="@+id/driverButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorAccent"
+            android:text="I'm a driver"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"
+            android:onClick="goToDriverSignIn"/>
+
+    </LinearLayout>
+</FrameLayout>
